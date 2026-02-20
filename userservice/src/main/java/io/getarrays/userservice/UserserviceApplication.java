@@ -20,13 +20,13 @@ public class UserserviceApplication {
         SpringApplication.run(UserserviceApplication.class, args);
 	}
 
-    //----------------------------------------Sercurity-------------------------------------------------
+    //----------------------------------------Security-------------------------------------------------
     @Bean
     PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
 
-    //----------------------------------------Sercurity-------------------------------------------------
+    //----------------------------------------Security-------------------------------------------------
 
 
     @Bean

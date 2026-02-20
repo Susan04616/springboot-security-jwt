@@ -2,6 +2,7 @@ package io.getarrays.userservice.filter;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +18,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j // Lombok: gives you a logger called "log"
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -80,7 +85,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
                                 .collect(Collectors.toList()))
                 .sign(algorithm); // sign token
 
-        //Refresh token
+        //Create refresh token
         String refresh_Token = JWT.create()
                 .withSubject(user.getUsername()) // username inside token
                 .withExpiresAt(new Date(System.currentTimeMillis() + 30 * 60 * 1000)) // 10 minutes
@@ -88,9 +93,20 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
                 .sign(algorithm); // sign token
 
         // Send token back to client in response header
-        response.setHeader("access_token", accessToken);
-        response.setHeader("refresh_token", refresh_Token);
 
+        /*response.setHeader("access_token", accessToken);
+        response.setHeader("refresh_token", refresh_Token);*/
+
+        // Prepare JSON response
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("access_token", accessToken);
+        tokens.put("refresh_token",refresh_Token);
+
+        // Tell browser/client this is JSON
+        response.setContentType(APPLICATION_JSON_VALUE);
+
+        // Write JSON to response body
+        new ObjectMapper().writeValue(response.getOutputStream(), tokens);
 
     }
 }
